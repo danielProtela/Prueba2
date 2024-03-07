@@ -53,6 +53,22 @@ def leer():
     
     return m
 
+@app.route('/API/leert', methods=['GET'])
+def leert():
+    conexion = mysql.connector.connect(**mysql_prueba)
+    # Crear un objeto Cursor para interactuar con la base de datos
+    cursor = conexion.cursor()
+
+    cursor.execute("SELECT * FROM usuarios")
+    usuario = cursor.fetchall()
+    cursor.close()
+    conexion.close()
+    m=[]
+    for i in usuario:
+        m.append({"Nombre": i[1], "id": i[0], "Contraseña": i[2]})
+    
+    return m
+
 #Crear entradas en la tabla de usuarios------------------------------------------------
 @app.route('/API/crear', methods=['POST'])
 def crear():
