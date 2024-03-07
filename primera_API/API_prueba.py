@@ -17,7 +17,7 @@ app = Flask(__name__)
 @app.route('/API/leerTablasDB', methods=['GET'])
 def leerTablasDB():
     conexion = mysql.connector.connect(**mysql_prueba)
-    #try:
+
     
     # Crear un objeto Cursor para interactuar con la base de datos
     cursor = conexion.cursor()
