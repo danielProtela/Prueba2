@@ -18,7 +18,7 @@ app = Flask(__name__)
 def leerTablasDB():
     conexion = mysql.connector.connect(**mysql_prueba)
 
-    
+
     # Crear un objeto Cursor para interactuar con la base de datos
     cursor = conexion.cursor()
 
@@ -128,11 +128,6 @@ def eliminar():
         if datos_recibidos and 'id' in datos_recibidos:
             id_user = datos_recibidos['id']
 
-        # Consulta para insertar una entrada en la tabla usuarios
-        consulta_eliminar = """
-            INSERT INTO usuarios (id)
-            VALUES (%s)
-        """
         # Ejecutar la consulta con el ID proporcionado en la URL
         cursor.execute(consulta_eliminar, (id_user,))
 
@@ -149,6 +144,6 @@ def eliminar():
         conexion.close()
 
 if __name__ == '__main__':
-    app.run(host='192.168.65.15', port=3005, debug=True)
+    app.run(host='192.168.65.18', port=3005, debug=True)
 
 
