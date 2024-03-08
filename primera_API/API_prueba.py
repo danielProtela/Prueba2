@@ -188,7 +188,42 @@ def modificar():
         if 'conexion' in locals():
             conexion.close()
 
+# Crear roles en tabla
+@app.route('/API/crear_rol', methods=['POST'])
+def crear_rol():
+    conexion = mysql.connector.connect(**mysql_prueba)
 
+    # Crear un objeto Cursor para interactuar con la base de datos
+    cursor = conexion.cursor()
+    datos_recibidos = request.get_json()
+
+    # Ejemplo de datos a insertar
+    if datos_recibidos and 'rol' in datos_recibidos and 'id' in datos_recibidos:
+        id_rol = datos_recibidos['id']
+        rol_usuario = datos_recibidos['rol']
+        consulta_id = "SELECT id FROM usuarios WHERE id = %s"
+        cursor.execute(consulta_id, (id_rol,))
+        if cursor.fetchone():
+            # Consulta para insertar una entrada en la tabla usuarios
+            consulta_insertar = """
+            INSERT INTO roles (id, rol)
+            VALUES (%s, %s)
+            """
+            # Ejecutar la consulta con los datos
+            cursor.execute(consulta_insertar, (id_rol, rol_usuario))
+
+            # Confirmar los cambios en la base de datos
+            conexion.commit()
+            cursor.close()
+            conexion.close()
+            return jsonify({'mensaje': 'Rol creado exitosamente'})
+        else:
+            return jsonify({"Error:": "No existe un usario con el id indicado"})
+    else:
+        # Manejar la falta de datos o claves necesarias en la solicitud
+        return jsonify({'error': 'Falta información necesaria en la solicitud'}), 400
+    
+    
 #Modificar datos de la tabla de roles-------------------------------------------
 @app.route('/API/modificar_rol', methods=['POST'])
 def modificar_rol():
@@ -306,7 +341,7 @@ def eliminar_rol():
         conexion.close()
 
 if __name__ == '__main__':
-    app.run(host='192.168.65.22', port=3005, debug=True)
+    app.run(host='192.168.65.15', port=3005, debug=True)
 
 
 
