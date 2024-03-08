@@ -244,7 +244,6 @@ def eliminar():
             id_user = datos_recibidos['id']
 
             # Ejecutar la consulta con el ID proporcionado en la URL
-            cursor.execute(consulta_eliminar, (id_user,))
             consulta_id = "SELECT id FROM usuarios WHERE id = %s"
             cursor.execute(consulta_id, (id_user,))
             if cursor.fetchone():
