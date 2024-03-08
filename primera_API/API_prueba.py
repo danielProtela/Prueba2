@@ -69,7 +69,21 @@ def leert():
     
     return m
 
-#Crear entradas en la tabla de usuarios------------------------------------------------
+#Función para leer tabla de roles--------------------------------------------------
+@app.route('/API/leer_roles', methods=['GET'])
+def leer_roles():
+    conexion = mysql.connector.connect(**mysql_prueba)
+    # Crear un objeto Cursor para interactuar con la base de datos
+    cursor = conexion.cursor()
+
+    cursor.execute("SELECT * FROM roles")
+    rol = cursor.fetchall()
+    cursor.close()
+    conexion.close()
+
+    return rol
+
+# Crear entradas en la tabla de usuarios------------------------------------------------
 @app.route('/API/crear', methods=['POST'])
 def crear():
         try: 
@@ -174,6 +188,47 @@ def modificar():
         if 'conexion' in locals():
             conexion.close()
 
+
+#Modificar datos de la tabla de roles-------------------------------------------
+@app.route('/API/modificar_rol', methods=['POST'])
+def modificar_rol():
+    try:
+        conexion = mysql.connector.connect(**mysql_prueba)
+        # Crear un objeto Cursor para interactuar con la base de datos
+        cursor = conexion.cursor()
+        # Consulta para eliminar un usuario por ID
+
+        datos_recibidos = request.get_json()
+        # Ejemplo de datos a insertar
+        
+        if 'id' in datos_recibidos and 'rol' in datos_recibidos:
+            rol_nuevo = datos_recibidos['rol']
+            id_user=datos_recibidos['id']
+            consulta_id = "SELECT id FROM usuarios WHERE id = %s"
+            cursor.execute(consulta_id, (id_user,))
+            if cursor.fetchone():
+                consulta_modificar = "UPDATE roles SET rol = %s WHERE id = %s"
+                # Ejecutar la consulta con el ID proporcionado en la URL
+                cursor.execute(consulta_modificar, (rol_nuevo, id_user))
+                # Confirmar los cambios en la base de datos
+                conexion.commit()
+                return jsonify({'mensaje': f'Usuario con ID {id_user} modificado correctamente'})
+            else:
+                return jsonify({'error': f'Error, no existe el usuario con ID {id_user}'})
+        else:
+            return jsonify({'error': 'Error modificando usuario'})
+        
+
+    except mysql.connector.Error as err:
+        return jsonify({'error': f'Error en la base de datos: {err}'}), 500  # Código de estado HTTP 500 para "Internal Server Error"
+
+    finally:
+        if 'cursor' in locals():
+                cursor.close()
+        if 'conexion' in locals():
+            conexion.close()
+
+
 #Eliminar datos de la tabla de usuarios
 @app.route('/API/eliminar', methods=['POST'])
 def eliminar():
@@ -187,6 +242,8 @@ def eliminar():
         if datos_recibidos and 'id' in datos_recibidos:
 
             id_user = datos_recibidos['id']
+
+            # Ejecutar la consulta con el ID proporcionado en la URL
             consulta_id = "SELECT id FROM usuarios WHERE id = %s"
             cursor.execute(consulta_id, (id_user,))
             if cursor.fetchone():
@@ -209,7 +266,47 @@ def eliminar():
         cursor.close()
         conexion.close()
 
+#Eliminar datos de la tabla de roles
+@app.route('/API/eliminar_rol', methods=['DELETE'])
+def eliminar_rol():
+    try:
+        conexion = mysql.connector.connect(**mysql_prueba)
+        # Crear un objeto Cursor para interactuar con la base de datos
+        cursor = conexion.cursor()
+
+        # Consulta para eliminar un usuario por ID
+        consulta_eliminar_rol = "DELETE FROM roles WHERE id = %s"
+        datos_recibidos = request.get_json()
+        # Ejemplo de datos a insertar
+        
+        if datos_recibidos and 'id' in datos_recibidos:
+            id_user = datos_recibidos['id']
+            consulta_id = "SELECT id FROM usuarios WHERE id = %s"
+            cursor.execute(consulta_id, (id_user,))
+            if cursor.fetchone():
+
+                consulta_eliminar = "DELETE FROM usuarios WHERE id = %s"
+                # Ejecutar la consulta con el ID proporcionado en la URL
+                cursor.execute(consulta_eliminar, (id_user,))
+            else:
+                return jsonify({"error": f'Error, El usuario con ID {id_user} no existe'})
+        else:
+            return jsonify({"error": f'Error eliminando usuario, no ID ingresado'})
+
+        # Confirmar los cambios en la base de datos
+        conexion.commit()
+
+        return jsonify({'mensaje': f'Rol con ID {id_user} eliminado correctamente'})
+
+    except mysql.connector.Error as err:
+        return jsonify({'error': f'Error en la base de datos: {err}'}), 500  # Código de estado HTTP 500 para "Internal Server Error"
+
+    finally:
+        cursor.close()
+        conexion.close()
+
 if __name__ == '__main__':
-    app.run(host='192.168.65.18', port=3005, debug=True)
+    app.run(host='192.168.65.22', port=3005, debug=True)
+
 
 
